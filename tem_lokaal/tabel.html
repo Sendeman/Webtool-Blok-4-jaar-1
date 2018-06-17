@@ -1,0 +1,60 @@
+<div>
+    <div class="menu">
+        <a href="/"><b><font color="#2f4f4f">Home</font></b></a>
+        <a href="/tabel"><b><font color="#2f4f4f">Tabel</a></font></b></a>
+        <a href="/blast"><b><font color="#2f4f4f">Blast</a></font></b></a>
+        <a href="/about"><b><font color="#2f4f4f">About</a></font></b></a>
+
+    </div>
+    <style>
+        .menu{
+            background-color: #D9E8F0;
+            padding: 25px
+
+        }
+        .menu a{
+            padding: 25px;
+            background-color: #D9E8F0;
+            text-align: center;
+            font-size: 24px;
+            border: black;
+        }
+        .menu a:hover {
+            background-color: #bfced6;
+            color: black;
+
+    </style>
+<form method="get">
+    <p style="font-family: Verdana; font-size: 14pt"><b>Zoek in beschrijving</b></p>
+    <input type="text" name=zoekopdracht_acc_code placeholder="Geef een accesie code op...">
+    <input type="text" name=zoekopdracht_eiwitfunctie placeholder="Geef een eiwit functie op...">
+    <input type="text" name=zoekopdracht_soorten placeholder="Geef een soort  op...">
+    <input type="submit" value="zoek">
+</form>
+</div>
+<p> hoi: {{ test }} </p>
+<div>
+</div>
+<div style="overflow-x:scroll; width:100%; text-align: right">
+    <style>
+        table, th, td {
+            border: 3px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            width: 100%;
+            max-width: 1300px;
+            overflow-x:scroll ;
+            text-align: left;
+            }
+        tr:nth-child(even){background-color: #D9E8F0;}
+    </style>
+    <table>
+        {% for regel in cursor %}
+            {% for object in regel %}
+                <td>{{ object }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>

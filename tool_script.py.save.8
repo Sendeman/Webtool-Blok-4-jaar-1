@@ -1,0 +1,74 @@
+from flask import Flask, request, make_response, render_template
+import mysql.connector
+
+app = Flask(__name__)
+app.debug = True
+@app.route('/')
+def home():
+    resp = make_response(render_template('home.html'))
+    return resp
+
+@app.route('/tabel')
+def zoeken_tabel():
+    default = ''
+    zoekopdracht_eiwitfunctie = request.args.get("zoekopdracht_eiwitfunctie",default)
+    zoekopdracht_acc_code = request.args.get("zoekopdracht_acc_code", default)
+    zoekopdracht_soorten = request.args.get("zoekopdracht_soorten", default)
+    test = request.args.get("test", default)
+    conn = mysql.connector.connect(host='localhost',user='owe4_bi1_14', passwd='blaat1234',db='owe4_bi1_14')    #Een connectie om de tabel namen op te vragen
+                                                                                       #Cursor met andere naam wordt gemaakt voor de connectie
+                                                                        #En andere query wordt uitgevoerd tegen de databse
+    cursor = conn.cursor() #cursor wordt gemaakt voor connectie
+
+    sql = """SELECT accession_code, protein_name, spieces, protein_function, protein_sequence,  FROM PROTEINS
+             NATURAL JOIN RESULTS_HAVE_PROTEINS 
+             NATURAL JOIN RESULTS;"""
+    sql2 = sql
+
+    if zoekopdracht_eiwitfunctie != default or zoekopdracht_acc_code != default or zoekopdracht_soorten != default:
+        sql = sql[:-1] + " WHERE"
+
+    #sql die word aangeroepen bij invoer zoekopdracht_eiwitfunctie
+    if zoekopdracht_eiwitfunctie != default:
+        zoekopdracht_eiwitfunctie = list(zoekopdracht_eiwitfunctie.split(', '))
+        for zoekwoord in zoekopdracht_eiwitfunctie:
+            zoekwoord = "\'%"+zoekwoord+"%\'"
+            sql += " AND protein_function LIKE " + zoekwoord
+
+    if zoekopdracht_acc_code != default:
+        zoekopdracht_acc_code = list(zoekopdracht_acc_code.split(', '))
+        for zoekwoord in zoekopdracht_acc_code:
+            zoekwoord = "\'%"+zoekwoord+"%\'"
+            sql += " AND accession_code LIKE " + zoekwoord
+
+    if zoekopdracht_soorten != default:
+        zoekopdracht_soorten = list(zoekopdracht_soorten.split(', '))
+        for zoekwoord in zoekopdracht_soorten:
+            zoekwoord = "\'%"+zoekwoord+"%\'"
+            sql += " AND species LIKE " + zoekwoord
+
+    if zoekopdracht_eiwitfunctie != default or zoekopdracht_acc_code != default or zoekopdracht_soorten != default:
+        sql = sql[:182] + sql[186:] + """;"""
+    cursor.execute(sql2)
+
+
+    resp = make_response(render_template('test.html',zoekopdracht_eiwitfunctie=zoekopdracht_eiwitfunctie, zoekopdracht_soorten= zoekopdracht_soorten, zoekopdracht_acc_code= zoekopdracht_acc_code,
+                                         test=sql, cursor=cursor))     #maakt een rspons aan voor de template
+    cursor.close()
+    conn.close()
+
+    return resp                                                                                                     #Alle conecties worden worden gesloten
+    
+
+@app.route('/blast')
+def blasten():
+    resp = make_response(render_template('blast.html'))
+    return resp
+
+@app.route('/about')
+def about():
+    resp = make_response(render_template('about.html'))
+    return resp
+
+if __name__ == '__main__':
+    app.run(debug=True)

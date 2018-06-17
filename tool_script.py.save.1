@@ -1,0 +1,41 @@
+from flask import Flask, request, make_response, render_template
+import mysql.connector
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    resp = make_response(render_template('home.html'))
+    return resp
+
+@app.route('/tabel')
+def zoeken_tabel():
+   
+    if "zoekopdracht" in request.args:
+	zoekopdracht = request.args.get("zoekopdracht")#zoekopdracht = request.args.get("zoekopdracht", '')
+
+    connect = mysql.connector.connect (host='localhost', user='owe4_bi1_14',
+       				   passwd='blaat1234', db='owe4_bi1_14')    #Een connectie om de tabel namen op te vragen
+    tabel_naam = connect.cursor()                                                                                       #Cursor met andere naam wordt gemaakt voor de connectie
+    tabel_naam.execute("show columns")                                                                        #En andere query wordt uitgevoerd tegen de databse
+
+    conn = mysql.connector.connect(host="localhost", user="owe4_bi1_14",
+				passwd="blaat1234", db="owe4_bi1_14")        #Andere connectie voor cursor
+    cursor = conn.cursor()                                                                                              #cursor wordt gemaakt voor connectie
+    cursor.execute("select * from proteins where protein_name like'%"+zoekopdracht+"%' limit 100")                          #querie die de cursor uitvoert tegen de database
+
+    resp = make_response(render_template('tabel.html', cursor=cursor, zoekopdracht=zoekopdracht, tabel_naam=tabel_naam))                                                        #maakt een rspons aan voor de template
+    cursor.close()
+    conn.close()
+    tabel_naam.close()
+    connect.close()                                                                                                     #Alle conecties worden worden gesloten
+    return resp
+
+@app.route('/blast')
+def blasten():
+    resp = make_response(render_template('blast.html'))
+    return resp
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

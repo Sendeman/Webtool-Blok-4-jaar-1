@@ -1,0 +1,51 @@
+from flask import Flask, request, make_response, render_template
+import mysql.connector
+
+app = Flask(__name__)
+app.debug = True
+@app.route('/')
+def home():
+    resp = make_response(render_template('home.html'))
+    return resp
+
+@app.route('/tabel')
+def zoeken_tabel():
+    zoekopdracht = ''
+    if "zoekopdracht" in request.args:
+        zoekopdracht = request.args.get("zoekopdracht",' ')
+    conn = mysql.connector.connect(host='localhost',user='owe4_bi1_14', passwd='blaat1234',db='owe4_bi1_14')    #Een connectie om de tabel namen op te vragen
+                                                                                       #Cursor met andere naam wordt gemaakt voor de connectie
+                                                                        #En andere query wordt uitgevoerd tegen de databse
+
+    cursor = conn.cursor() #cursor wordt gemaakt voor connectie
+    zoekopdracht = '%\''+zoekopdracht+'\'%'
+    sql = """select * from PROTEINS where protein_function like {};""" .format(zoekopdracht)
+    cursor.execute(sql)                          #querie die de cursor uitvoert tegen de database
+ 	  
+    
+    resp = make_response(render_template('test.html',zoekopdracht=zoekopdracht, cursor=cursor))                                                        #maakt een rspons aan voor de template
+    cursor.close()
+    conn.close()
+
+    return resp                                                                                                     #Alle conecties worden worden gesloten
+    
+
+@app.route('/blast')
+def blasten():
+    resp = make_response(render_template('blast.html'))
+    return resp
+
+@app.route('/test')
+def test():
+    conn = mysql.connector.connect(
+    host='localhost',
+    user='owe4_bi1_14',
+    passwd='blaat1234',
+    db='owe4_bi1_14')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * from proteins')
+    alles = cursor.fetchall()
+    return '''<header>%S</header>'''+alles
+
+if __name__ == '__main__':
+    app.run(debug=True)

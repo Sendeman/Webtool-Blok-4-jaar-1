@@ -1,0 +1,42 @@
+from flask import Flask, request, make_response, render_template
+import mysql.connector
+import urllib
+
+app = Flask(__name__)
+app.debug = True
+@app.route('/')
+def home():
+    resp = make_response(render_template('home.html'))
+    return resp
+
+@app.route('/tabel')
+def zoeken_tabel():
+    default = ''
+    zoekopdracht = request.args.get("zoekopdracht",default)
+    conn = mysql.connector.connect(host='localhost',user='owe4_bi1_14', passwd='blaat1234',db='owe4_bi1_14')    #Een connectie om de tabel namen op te vragen
+                                                                                       #Cursor met andere naam wordt gemaakt voor de connectie
+                                                                        #En andere query wordt uitgevoerd tegen de databse
+
+    cursor = conn.cursor() #cursor wordt gemaakt voor connectie
+    sql = """SELECT * FROM PROTEINS"""
+    zoekopdracht = urllib.unquote(zoekopdracht)
+    if zoekopdracht is not default:
+        zoekopdracht = tuple(zoekopdracht.split(', '))
+        sql = """select * from PROTEINS where protein_function in {};""" .format(zoekopdracht)
+    cursor.execute(sql)                          #querie die de cursor uitvoert tegen de database
+ 	  
+    
+    resp = make_response(render_template('test.html',zoekopdracht=zoekopdracht, cursor=cursor,test=test))                                                        #maakt een rspons aan voor de template
+    cursor.close()
+    conn.close()
+
+    return resp                                                                                                     #Alle conecties worden worden gesloten
+    
+
+@app.route('/blast')
+def blasten():
+    resp = make_response(render_template('blast.html'))
+    return resp
+
+if __name__ == '__main__':
+    app.run(debug=True)
